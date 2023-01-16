@@ -14,7 +14,31 @@ class PubSub {
 
 fun main() {
     val iterPublisher = iterPublisher()
-    iterPublisher.subscribe(logSub())
+    val mapPublisher = mapPublisher(iterPublisher) { each -> each * 10 }
+    mapPublisher.subscribe(logSub())
+}
+
+fun mapPublisher(lastPublisher: Publisher<Int>, func: java.util.function.Function<Int, Int>) = object: Publisher<Int> {
+    override fun subscribe(sub: Subscriber<in Int>?) {
+        lastPublisher.subscribe(object: Subscriber<Int> {
+            override fun onSubscribe(s: Subscription?) {
+                sub!!.onSubscribe(s)
+            }
+
+            override fun onNext(i: Int?) {
+                sub!!.onNext(func.apply(i!!))
+            }
+
+            override fun onError(t: Throwable?) {
+                sub!!.onError(t)
+            }
+
+            override fun onComplete() {
+                sub!!.onComplete()
+            }
+
+        })
+    }
 }
 
 fun iterPublisher() = object : Publisher<Int> {

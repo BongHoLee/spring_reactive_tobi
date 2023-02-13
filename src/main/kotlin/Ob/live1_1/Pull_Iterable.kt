@@ -1,4 +1,4 @@
-package Ob
+package Ob.live1_1
 
 fun main() {
     createAnonymousClassOfIterable()
